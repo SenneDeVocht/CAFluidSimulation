@@ -6,10 +6,10 @@
 #include "World.h"
 
 // Size
-constexpr int g_WindowWidth = 90*5;
-constexpr int g_WindowHeight = 90*5;
-constexpr int g_WorldWidth = 90;
-constexpr int g_WorldHeight = 90;
+constexpr int g_WindowWidth = 500;
+constexpr int g_WindowHeight = 500;
+constexpr int g_WorldWidth = 50;
+constexpr int g_WorldHeight = 50;
 
 // Rendering
 SDL_Renderer* g_pRenderer = nullptr;
@@ -54,18 +54,33 @@ void RenderWorld(const World& world)
 	{
 		for (int y = 0; y < g_WorldHeight; ++y)
 		{
-			if (water[x][y].pressure == 0)
+			if (water[x][y].pressure <= 0)
 				continue;
 
-			SDL_FRect rect{
+			if (water[x][y].pressure <= 1)
+			{
+				SDL_FRect rect{
+					x * cellWidth,
+					g_WindowHeight - (y + 1 - (1 - water[x][y].pressure)) * cellHeight,
+					cellWidth,
+					cellHeight
+				};
+
+				SDL_SetRenderDrawColor(g_pRenderer, 255 / 2, 255 / 2, 255, 255);
+				SDL_RenderFillRectF(g_pRenderer, &rect);
+			}
+			else
+			{
+				SDL_FRect rect{
 				x * cellWidth,
 				g_WindowHeight - (y + 1) * cellHeight,
 				cellWidth,
 				cellHeight
-			};
-			
-			SDL_SetRenderDrawColor(g_pRenderer, 128 - water[x][y].pressure * 20, 128 - water[x][y].pressure * 20, 255, 255);
-			SDL_RenderFillRectF(g_pRenderer, &rect);
+				};
+
+				SDL_SetRenderDrawColor(g_pRenderer, 255 / (water[x][y].pressure + 1), 255 / (water[x][y].pressure + 1), 255, 255);
+				SDL_RenderFillRectF(g_pRenderer, &rect);
+			}
 		}
 	}
 

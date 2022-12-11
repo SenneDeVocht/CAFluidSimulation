@@ -25,13 +25,25 @@ public:
 	void Update();
 
 private:
+	// Operates on m_NextCells
+	void TransferPressure(float amount, const glm::ivec2& start, const glm::ivec2& destination);
+
+	// How much pressure should be in the destination cell
+	float GetStableState(float totalPressure) const;
+
+	bool IsPositionInBounds(const glm::ivec2& position) const;
+
 	std::vector<std::vector<WaterCell>> m_WaterCells;
+	std::vector<std::vector<WaterCell>> m_NextWaterCells;
 	std::vector<std::vector<bool>> m_Boundaries;
 	glm::ivec2 m_Size;
 
 	const float m_Gravity = -0.1f;
-	const float m_PressureVelocity = 0.5f;
 	const float m_Drag = 0.1f;
-	const float m_MaxPressure = 1.1f;
-	const float m_IDK = 1.f;
+	const float m_VelocityMultiplier = 1.f;
+
+	const float m_MaxPressure = 1.0f;
+	const float m_MinPressure = 0.001f;
+	const float m_MaxCompression = 0.02f;
+	const float m_MaxFlow = 1.f;
 };
