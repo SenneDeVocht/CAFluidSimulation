@@ -11,12 +11,12 @@ public:
 	struct WaterCell
 	{
 		glm::vec2 Velocity;
-		float pressure;
+		float Pressure;
 	};
 
 	World(const glm::ivec2& size);
 
-	void SetWater(const glm::ivec2& position, const WaterCell& water);
+	void AddWater(const glm::ivec2& position, const WaterCell& water);
 	const std::vector<std::vector<WaterCell>>& GetWaterCells() const { return m_WaterCells; }
 
 	void SetBoundary(const glm::ivec2& position, bool boundary);
@@ -25,10 +25,9 @@ public:
 	void Update();
 
 private:
-	// Operates on m_NextCells
 	void TransferPressure(float amount, const glm::ivec2& start, const glm::ivec2& destination);
-
-	// How much pressure should be in the destination cell
+	void TransferPressure(float amount, const glm::vec2& velocity, const glm::ivec2& start, const glm::ivec2& destination);
+	
 	float GetStableState(float totalPressure) const;
 
 	bool IsPositionInBounds(const glm::ivec2& position) const;

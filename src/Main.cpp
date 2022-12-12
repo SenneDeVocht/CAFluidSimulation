@@ -54,16 +54,16 @@ void RenderWorld(const World& world)
 	{
 		for (int y = 0; y < g_WorldHeight; ++y)
 		{
-			if (water[x][y].pressure <= 0)
+			if (water[x][y].Pressure < 0.001f)
 				continue;
 
-			if (water[x][y].pressure <= 1)
+			if (water[x][y].Pressure <= 1)
 			{
-				SDL_FRect rect{
+				SDL_FRect rect {
 					x * cellWidth,
-					g_WindowHeight - (y + 1 - (1 - water[x][y].pressure)) * cellHeight,
+					g_WindowHeight - (y + water[x][y].Pressure) * cellHeight,
 					cellWidth,
-					cellHeight
+					water[x][y].Pressure * cellHeight
 				};
 
 				SDL_SetRenderDrawColor(g_pRenderer, 255 / 2, 255 / 2, 255, 255);
@@ -71,14 +71,14 @@ void RenderWorld(const World& world)
 			}
 			else
 			{
-				SDL_FRect rect{
-				x * cellWidth,
-				g_WindowHeight - (y + 1) * cellHeight,
-				cellWidth,
-				cellHeight
+				SDL_FRect rect = {
+					x * cellWidth,
+					g_WindowHeight - (y + 1) * cellHeight,
+					cellWidth,
+					cellHeight
 				};
 
-				SDL_SetRenderDrawColor(g_pRenderer, 255 / (water[x][y].pressure + 1), 255 / (water[x][y].pressure + 1), 255, 255);
+				SDL_SetRenderDrawColor(g_pRenderer, 255 / (water[x][y].Pressure + 1), 255 / (water[x][y].Pressure + 1), 255, 255);
 				SDL_RenderFillRectF(g_pRenderer, &rect);
 			}
 		}
@@ -148,11 +148,7 @@ int main()
 
 			if (g_RightMousePressed)
 			{
-				world.SetWater({ worldX, worldY }, { {0, 0}, 1 });
-				/*world.SetWater({ worldX + 1, worldY }, { {0, 0}, 1 });
-				world.SetWater({ worldX - 1, worldY }, { {0, 0}, 1 });
-				world.SetWater({ worldX, worldY + 1 }, { {0, 0}, 1 });
-				world.SetWater({ worldX, worldY - 1 }, { {0, 0}, 1 });*/
+				world.AddWater({ worldX, worldY }, { {0, 0}, 0.1f });
 			}
 
 			world.Update();
