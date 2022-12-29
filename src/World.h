@@ -39,10 +39,11 @@ private:
 
 	const float m_Gravity = -0.1f;
 	const float m_Drag = 0.1f;
-	const float m_VelocityMultiplier = 1.f;
+	const float m_VelocityMultiplier = 0.5f;
 
 	const float m_MaxPressure = 1.0f;
 	const float m_MinPressure = 0.001f;
-	const float m_MaxCompression = 0.02f;
-	const float m_MaxFlow = 1.f;
+	const float m_MaxCompression = 0.25f;
+	const float m_MaxFlow = 1.25f;
+	const float m_FlowDueToPressure = 0.05f;
 };

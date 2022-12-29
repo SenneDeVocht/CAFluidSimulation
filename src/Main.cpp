@@ -126,7 +126,7 @@ int main()
 
 	// Timer
 	float timer = 0;
-	constexpr float updateInterval = 1/60.f;
+	constexpr float updateInterval = 1/120.f;
 	//constexpr float updateInterval = 0.2f;
 
 	// Loop
@@ -149,6 +149,10 @@ int main()
 			if (g_RightMousePressed)
 			{
 				world.AddWater({ worldX, worldY }, { {0, 0}, 0.1f });
+				world.AddWater({ worldX + 1, worldY }, { {0, 0}, 0.1f });
+				world.AddWater({ worldX - 1, worldY }, { {0, 0}, 0.1f });
+				world.AddWater({ worldX, worldY + 1 }, { {0, 0}, 0.1f });
+				world.AddWater({ worldX, worldY - 1 }, { {0, 0}, 0.1f });
 			}
 
 			world.Update();

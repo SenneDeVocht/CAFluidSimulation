@@ -17,6 +17,9 @@ void World::AddWater(const glm::ivec2& position, const WaterCell& water)
 	if (!IsPositionInBounds(position))
 		return;
 
+	// Remove boundaries
+	m_Boundaries[position.x][position.y] = false;
+
 	// Set State
 	m_WaterCells[position.x][position.y].Velocity =
 		(m_WaterCells[position.x][position.y].Velocity * m_WaterCells[position.x][position.y].Pressure + water.Velocity * water.Pressure)
@@ -86,7 +89,6 @@ bool World::IsPositionInBounds(const glm::ivec2& position) const
 
 void World::Update()
 {
-
 	// Apply drag
 	for (int y = 0; y < m_Size.y; ++y)
 	{
@@ -102,6 +104,30 @@ void World::Update()
 		for (int x = 0; x < m_Size.x; ++x)
 		{
 			m_WaterCells[x][y].Velocity.y += m_Gravity;
+		}
+	}
+
+	// Flow due to pressure diff
+	for (int y = 0; y < m_Size.y; ++y)
+	{
+		for (int x = 0; x < m_Size.x; ++x)
+		{
+			if (m_Boundaries[x][y])
+				continue;
+
+			const float pressureAtPos = m_WaterCells[x][y].Pressure;
+
+			if (IsPositionInBounds({ x, y + 1 }) && !m_Boundaries[x][y + 1])
+				m_WaterCells[x][y].Velocity += glm::vec2{ 0, 1 } * (pressureAtPos - m_WaterCells[x][y + 1].Pressure) * m_FlowDueToPressure;
+
+			if (IsPositionInBounds({ x, y - 1 }) && !m_Boundaries[x][y - 1])
+				m_WaterCells[x][y].Velocity += glm::vec2{ 0, -1 } * (pressureAtPos - m_WaterCells[x][y - 1].Pressure) * m_FlowDueToPressure;
+
+			if (IsPositionInBounds({ x + 1, y }) && !m_Boundaries[x + 1][y])
+				m_WaterCells[x][y].Velocity += glm::vec2{ 1, 0 } * (pressureAtPos - m_WaterCells[x + 1][y].Pressure) * m_FlowDueToPressure;
+
+			if (IsPositionInBounds({ x - 1, y }) && !m_Boundaries[x - 1][y])
+				m_WaterCells[x][y].Velocity += glm::vec2{ -1, 0 } * (pressureAtPos - m_WaterCells[x - 1][y].Pressure) * m_FlowDueToPressure;
 		}
 	}
 
@@ -160,6 +186,14 @@ void World::Update()
 					continue;
 			}
 
+			// Give velocity to wanteddir cell in proportion to remaining
+			if (IsPositionInBounds(glm::ivec2{ x, y } + dir) &&
+				!m_Boundaries[x][y] && !m_Boundaries[x + dir.x][y + dir.y])
+			{
+				m_WaterCells[x + dir.x][y + dir.y].Velocity += m_WaterCells[x][y].Velocity * remainingPressure
+					/ m_WaterCells[x + dir.x][y + dir.y].Pressure;
+			}
+
 			// Left
 			if (IsPositionInBounds(glm::ivec2{ x + dir.y, y - dir.x }) &&
 				!m_Boundaries[x][y] && !m_Boundaries[x + dir.y][y - dir.x]) {
@@ -167,8 +201,7 @@ void World::Update()
 				float flow = (m_WaterCells[x][y].Pressure - m_WaterCells[x + dir.y][y - dir.x].Pressure) / 4;
 				flow = glm::clamp(flow, 0.f, remainingPressure);
 
-				const auto vel = glm::vec2{ dir.y, -dir.x } * glm::length(m_WaterCells[x][y].Velocity);
-				TransferPressure(flow, vel, { x, y }, { x + dir.y, y - dir.x });
+				TransferPressure(flow, m_WaterCells[x][y].Velocity, { x, y }, { x + dir.y, y - dir.x });
 				remainingPressure -= flow;
 
 				if (remainingPressure <= 0)
@@ -183,8 +216,7 @@ void World::Update()
 				float flow = (m_WaterCells[x][y].Pressure - m_WaterCells[x - dir.y][y + dir.x].Pressure) / 4;
 				flow = glm::clamp(flow, 0.f, remainingPressure);
 
-				const auto vel = glm::vec2{ -dir.y, dir.x } * glm::length(m_WaterCells[x][y].Velocity);
-				TransferPressure(flow, vel, { x, y }, { x - dir.y, y + dir.x });
+				TransferPressure(flow, m_WaterCells[x][y].Velocity, { x, y }, { x - dir.y, y + dir.x });
 				remainingPressure -= flow;
 
 				if (remainingPressure <= 0)
