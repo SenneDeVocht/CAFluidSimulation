@@ -8,8 +8,8 @@
 // Size
 constexpr int g_WindowWidth = 500;
 constexpr int g_WindowHeight = 500;
-constexpr int g_WorldWidth = 50;
-constexpr int g_WorldHeight = 50;
+constexpr int g_WorldWidth = 35;
+constexpr int g_WorldHeight = 35;
 
 // Rendering
 SDL_Renderer* g_pRenderer = nullptr;
@@ -59,15 +59,31 @@ void RenderWorld(const World& world)
 
 			if (water[x][y].Pressure <= 1)
 			{
-				SDL_FRect rect {
+				if (y + 1 < g_WorldHeight &&
+					water[x][y+1].Pressure >= 0.001f)
+				{
+					SDL_FRect rect = {
 					x * cellWidth,
-					g_WindowHeight - (y + water[x][y].Pressure) * cellHeight,
+					g_WindowHeight - (y + 1) * cellHeight,
 					cellWidth,
-					water[x][y].Pressure * cellHeight
-				};
+					cellHeight
+					};
 
-				SDL_SetRenderDrawColor(g_pRenderer, 255 / 2, 255 / 2, 255, 255);
-				SDL_RenderFillRectF(g_pRenderer, &rect);
+					SDL_SetRenderDrawColor(g_pRenderer, 255 / (water[x][y].Pressure + 1), 255 / (water[x][y].Pressure + 1), 255, 255);
+					SDL_RenderFillRectF(g_pRenderer, &rect);
+				}
+				else
+				{
+					SDL_FRect rect{
+						x * cellWidth,
+						g_WindowHeight - (y + water[x][y].Pressure) * cellHeight,
+						cellWidth,
+						water[x][y].Pressure * cellHeight
+					};
+
+					SDL_SetRenderDrawColor(g_pRenderer, 255 / 2, 255 / 2, 255, 255);
+					SDL_RenderFillRectF(g_pRenderer, &rect);
+				}
 			}
 			else
 			{
@@ -126,7 +142,7 @@ int main()
 
 	// Timer
 	float timer = 0;
-	constexpr float updateInterval = 1/120.f;
+	constexpr float updateInterval = 1/60.f;
 	//constexpr float updateInterval = 0.2f;
 
 	// Loop

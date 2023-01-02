@@ -201,13 +201,13 @@ void World::Update()
 				float flow = (m_WaterCells[x][y].Pressure - m_WaterCells[x + dir.y][y - dir.x].Pressure) / 4;
 				flow = glm::clamp(flow, 0.f, remainingPressure);
 
-				TransferPressure(flow, m_WaterCells[x][y].Velocity, { x, y }, { x + dir.y, y - dir.x });
+				glm::vec2 vel = glm::vec2{ dir.y, -dir.x } * 0.5f * m_WaterCells[x][y].Velocity;
+				TransferPressure(flow, vel, { x, y }, { x + dir.y, y - dir.x });
 				remainingPressure -= flow;
 
 				if (remainingPressure <= 0)
 					continue;
 			}
-
 
 			// Right
 			if (IsPositionInBounds(glm::ivec2{ x - dir.y, y + dir.x }) &&
@@ -216,7 +216,8 @@ void World::Update()
 				float flow = (m_WaterCells[x][y].Pressure - m_WaterCells[x - dir.y][y + dir.x].Pressure) / 4;
 				flow = glm::clamp(flow, 0.f, remainingPressure);
 
-				TransferPressure(flow, m_WaterCells[x][y].Velocity, { x, y }, { x - dir.y, y + dir.x });
+				glm::vec2 vel = glm::vec2{ -dir.y, dir.x } *0.5f * m_WaterCells[x][y].Velocity;
+				TransferPressure(flow, vel, { x, y }, { x - dir.y, y + dir.x });
 				remainingPressure -= flow;
 
 				if (remainingPressure <= 0)
