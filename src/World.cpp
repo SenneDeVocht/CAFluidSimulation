@@ -2,8 +2,8 @@
 #include <SDL.h>
 #include <array>
 #include <iostream>
-
-int prevSum = 0;
+#include <algorithm>
+#include <execution>
 
 World::World(const glm::ivec2& size)
 	: m_WaterCells(size.x, std::vector<WaterCell>(size.y, { {0, 0}, 0 }))
@@ -90,27 +90,27 @@ bool World::IsPositionInBounds(const glm::ivec2& position) const
 void World::Update()
 {
 	// Apply drag
-	for (int y = 0; y < m_Size.y; ++y)
+	for (int x = 0; x < m_Size.x; ++x)
 	{
-		for (int x = 0; x < m_Size.x; ++x)
+		for (int y = 0; y < m_Size.y; ++y)
 		{
 			m_WaterCells[x][y].Velocity = m_WaterCells[x][y].Velocity * (1 - m_Drag);
 		}
 	}
 
 	// Apply gravity
-	for (int y = 0; y < m_Size.y; ++y)
+	for (int x = 0; x < m_Size.x; ++x)
 	{
-		for (int x = 0; x < m_Size.x; ++x)
+		for (int y = 0; y < m_Size.y; ++y)
 		{
 			m_WaterCells[x][y].Velocity.y += m_Gravity;
 		}
 	}
 
 	// Flow due to pressure diff
-	for (int y = 0; y < m_Size.y; ++y)
+	for (int x = 0; x < m_Size.x; ++x)
 	{
-		for (int x = 0; x < m_Size.x; ++x)
+		for (int y = 0; y < m_Size.y; ++y)
 		{
 			if (m_Boundaries[x][y])
 				continue;
@@ -132,10 +132,10 @@ void World::Update()
 	}
 
     // Calculate wanted directions
-	std::vector<std::vector<glm::ivec2>> directions(m_Size.x, std::vector<glm::ivec2>(m_Size.y, { 0, 0 }));
-	for (int y = 0; y < m_Size.y; ++y)
+	std::vector directions(m_Size.x, std::vector<glm::ivec2>(m_Size.y, { 0, 0 }));
+	for (int x = 0; x < m_Size.x; ++x)
 	{
-		for (int x = 0; x < m_Size.x; ++x)
+		for (int y = 0; y < m_Size.y; ++y)
 		{
 			if (m_WaterCells[x][y].Pressure == 0 || m_WaterCells[x][y].Velocity == glm::vec2{0, 0})
 				continue;
@@ -155,9 +155,9 @@ void World::Update()
 	// Move cells to fill wanted direction
 	m_NextWaterCells = m_WaterCells;
 
-	for (int y = 0; y < m_Size.y; ++y)
+	for (int x = 0; x < m_Size.x; ++x)
 	{
-		for (int x = 0; x < m_Size.x; ++x)
+		for (int y = 0; y < m_Size.y; ++y)
 		{
 			if (m_WaterCells[x][y].Pressure < m_MinPressure)
 			{
@@ -201,7 +201,7 @@ void World::Update()
 				float flow = (m_WaterCells[x][y].Pressure - m_WaterCells[x + dir.y][y - dir.x].Pressure) / 4;
 				flow = glm::clamp(flow, 0.f, remainingPressure);
 
-				glm::vec2 vel = glm::vec2{ dir.y, -dir.x } * 0.5f * m_WaterCells[x][y].Velocity;
+				glm::vec2 vel = glm::vec2{ dir.y, -dir.x } *0.5f * m_WaterCells[x][y].Velocity;
 				TransferPressure(flow, vel, { x, y }, { x + dir.y, y - dir.x });
 				remainingPressure -= flow;
 
@@ -226,7 +226,7 @@ void World::Update()
 
 			// Up
 			if (IsPositionInBounds(glm::ivec2{ x, y + 1 }) &&
-				!m_Boundaries[x][y]	&& !m_Boundaries[x][y + 1]) {
+				!m_Boundaries[x][y] && !m_Boundaries[x][y + 1]) {
 				float flow = remainingPressure - GetStableState(remainingPressure + m_WaterCells[x][y + 1].Pressure);
 				flow = glm::clamp(flow, 0.f, std::min(m_MaxFlow, remainingPressure));
 
@@ -236,9 +236,8 @@ void World::Update()
 			}
 		}
 	}
-
+	
 	m_WaterCells = m_NextWaterCells;
-
 
 	// Make everything valid
 	for (int y = 0; y < m_Size.y; ++y)

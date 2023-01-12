@@ -8,8 +8,8 @@
 // Size
 constexpr int g_WindowWidth = 500;
 constexpr int g_WindowHeight = 500;
-constexpr int g_WorldWidth = 35;
-constexpr int g_WorldHeight = 35;
+constexpr int g_WorldWidth = 250;
+constexpr int g_WorldHeight = 250;
 
 // Rendering
 SDL_Renderer* g_pRenderer = nullptr;
@@ -142,8 +142,7 @@ int main()
 
 	// Timer
 	float timer = 0;
-	constexpr float updateInterval = 1/60.f;
-	//constexpr float updateInterval = 0.2f;
+	constexpr float updateInterval = 1/120.f;
 
 	// Loop
     bool quit = false;
@@ -153,7 +152,7 @@ int main()
 
 		quit = HandleInput();
 
-		while (timer >= updateInterval)
+		//while (timer >= updateInterval)
 		{
 			// input
 			const int worldX = (float)g_MouseX / g_WindowWidth * g_WorldWidth;
@@ -171,7 +170,11 @@ int main()
 				world.AddWater({ worldX, worldY - 1 }, { {0, 0}, 0.1f });
 			}
 
+			auto updateStart = std::chrono::high_resolution_clock::now();
 			world.Update();
+			auto updateEnd = std::chrono::high_resolution_clock::now();
+			std::cout << std::chrono::duration<float>(updateEnd - updateStart).count() << std::endl;
+
 			timer -= updateInterval;
 		}
 		
