@@ -4,8 +4,12 @@ project(CellularAutomata)
 
 add_executable (
 	CellularAutomata
-	"src/Main.cpp" 
-	"src/World.h" "src/World.cpp")
+	#"src/BenchmarkMain.cpp"
+	"src/InputMain.cpp"
+	"src/World.h" "src/World.cpp"
+	"src/PressVelWorld.h" "src/PressVelWorld.cpp"
+	"src/NoitaWorld.h" "src/NoitaWorld.cpp"
+	"src/PressWorld.h" "src/PressWorld.cpp")
 
 include_directories("src")
 
