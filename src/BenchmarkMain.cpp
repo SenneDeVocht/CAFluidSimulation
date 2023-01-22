@@ -7,9 +7,10 @@
 #include "NoitaWorld.h"
 #include "PressWorld.h"
 #include "PressVelWorld.h"
+#include "PressVelWorldThreaded.h"
 
 // Benchmark
-constexpr int g_NumSteps = 2000;
+constexpr int g_NumSteps = 4000;
 constexpr int g_MaxSize = 250;
 
 // Size
@@ -119,10 +120,10 @@ int main()
 	}
 
 	std::cout << "size,time" << std::endl;
-	for (size_t size = 50; size <= g_MaxSize; size += 10)
+	for (size_t size = 10; size <= g_MaxSize; size += 10)
 	{
 		// Create world
-		PressVelWorld world({ size, size });
+		PressVelWorldThreaded world({ size, size });
 
 		// Full water
 		/*for (int x = 0; x < size; x++)
@@ -171,15 +172,6 @@ int main()
 			}
 		}
 
-		// Left water
-		/*for (int x = 0; x < size / 3; x++)
-		{
-			for (int y = 0; y < size; y++)
-			{
-				world.SetWater({ x, y }, true);
-			}
-		}*/
-
 		// Loop
 		long long updateTime = 0;
 		for (int i = 0; i < g_NumSteps; i++)
@@ -199,8 +191,6 @@ int main()
 				SDL_RenderPresent(g_pRenderer);
 			}
 		}
-
-		while (true) { }
 
 		std::cout << size << "," << updateTime << std::endl;
 	}

@@ -4,10 +4,11 @@ project(CellularAutomata)
 
 add_executable (
 	CellularAutomata
-	#"src/BenchmarkMain.cpp"
-	"src/InputMain.cpp"
+	"src/BenchmarkMain.cpp"
+	#"src/InputMain.cpp"
 	"src/World.h" "src/World.cpp"
 	"src/PressVelWorld.h" "src/PressVelWorld.cpp"
+	"src/PressVelWorldThreaded.h" "src/PressVelWorldThreaded.cpp"
 	"src/NoitaWorld.h" "src/NoitaWorld.cpp"
 	"src/PressWorld.h" "src/PressWorld.cpp")
 
@@ -16,6 +17,6 @@ include_directories("src")
 add_subdirectory("external/SDL")
 include_directories(CellularAutomata "external/SDL/include")
 target_link_libraries(CellularAutomata SDL2-static)
-set_property(TARGET CellularAutomata PROPERTY CXX_STANDARD 17)
+set_property(TARGET CellularAutomata PROPERTY CXX_STANDARD 20)
 
 include_directories("external/glm")

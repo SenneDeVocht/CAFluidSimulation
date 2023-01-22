@@ -71,7 +71,6 @@ void PressVelWorld::TransferPressure(float amount, const glm::ivec2& start, cons
 	const glm::vec2 velocity = m_WaterCells[start.x][start.y].Velocity;
 	TransferPressure(amount, velocity, start, destination);
 }
-
 void PressVelWorld::TransferPressure(float amount, const glm::vec2& velocity, const glm::ivec2& start, const glm::ivec2& destination)
 {
 	if (start == destination || amount == 0 ||
@@ -105,7 +104,6 @@ float PressVelWorld::GetStableState(float totalPressure) const
 	return (totalPressure + m_MaxCompression) / 2;
 }
 
-
 bool PressVelWorld::IsPositionInBounds(const glm::ivec2& position) const
 {
 	return position.x >= 0 && position.x < m_Size.x&&
@@ -114,38 +112,22 @@ bool PressVelWorld::IsPositionInBounds(const glm::ivec2& position) const
 
 void PressVelWorld::Update()
 {
-	// Apply drag
+	std::vector directions(m_Size.x, std::vector<glm::ivec2>(m_Size.y, { 0, 0 }));
+	
 	for (int x = 0; x < m_Size.x; ++x)
 	{
 		for (int y = 0; y < m_Size.y; ++y)
 		{
+			// Drag
 			m_WaterCells[x][y].Velocity = m_WaterCells[x][y].Velocity * (1 - m_Drag);
-		}
-	}
 
-	// Apply gravity
-	for (int x = 0; x < m_Size.x; ++x)
-	{
-		for (int y = 0; y < m_Size.y; ++y)
-		{
+			// Gravity
 			m_WaterCells[x][y].Velocity.y += m_Gravity;
-		}
-	}
 
-	// Wind
-	for (int x = 0; x < m_Size.x; ++x)
-	{
-		for (int y = 0; y < m_Size.y; ++y)
-		{
-			m_WaterCells[x][y].Velocity.x += 0.1f;
-		}
-	}
+			// Wind
+			//m_WaterCells[x][y].Velocity.x += 0.1f;
 
-	// Flow due to pressure diff
-	for (int x = 0; x < m_Size.x; ++x)
-	{
-		for (int y = 0; y < m_Size.y; ++y)
-		{
+			// Pressure Diff
 			if (m_Boundaries[x][y])
 				continue;
 
@@ -162,15 +144,8 @@ void PressVelWorld::Update()
 
 			if (IsPositionInBounds({ x - 1, y }) && !m_Boundaries[x - 1][y])
 				m_WaterCells[x][y].Velocity += glm::vec2{ -1, 0 } *(pressureAtPos - m_WaterCells[x - 1][y].Pressure) * m_FlowDueToPressure;
-		}
-	}
 
-	// Calculate wanted directions
-	std::vector directions(m_Size.x, std::vector<glm::ivec2>(m_Size.y, { 0, 0 }));
-	for (int x = 0; x < m_Size.x; ++x)
-	{
-		for (int y = 0; y < m_Size.y; ++y)
-		{
+			// Wanted direction
 			if (m_WaterCells[x][y].Pressure == 0 || m_WaterCells[x][y].Velocity == glm::vec2{ 0, 0 })
 				continue;
 
@@ -185,7 +160,7 @@ void PressVelWorld::Update()
 				directions[x][y].y = (randFloat() < ySize * m_VelocityMultiplier) * glm::sign(m_WaterCells[x][y].Velocity.y);
 		}
 	}
-
+	
 	// Move cells to fill wanted direction
 	m_NextWaterCells = m_WaterCells;
 

@@ -7,6 +7,7 @@
 #include "NoitaWorld.h"
 #include "PressWorld.h"
 #include "PressVelWorld.h"
+#include "PressVelWorldThreaded.h"
 
 // Size
 constexpr int g_WorldWidth = 50;
@@ -62,15 +63,30 @@ void RenderWorld(const World& world)
 
 			if (pressures[x][y] <= 1)
 			{
-				SDL_FRect rect{
-					x * cellWidth,
-					g_WindowHeight - (y + pressures[x][y]) * cellHeight,
-					cellWidth,
-					pressures[x][y] * cellHeight
-				};
+				if (y + 1 < g_WorldHeight && pressures[x][y + 1] > 0.001f)
+				{
+					SDL_FRect rect = {
+						x * cellWidth,
+						g_WindowHeight - (y + 1) * cellHeight,
+						cellWidth,
+						cellHeight
+					};
 
-				SDL_SetRenderDrawColor(g_pRenderer, 255 / 2, 255 / 2, 255, 255);
-				SDL_RenderFillRectF(g_pRenderer, &rect);
+					SDL_SetRenderDrawColor(g_pRenderer, 255 / 2, 255 / 2, 255, 255);
+					SDL_RenderFillRectF(g_pRenderer, &rect);
+				}
+				else
+				{
+					SDL_FRect rect{
+						x * cellWidth,
+						g_WindowHeight - (y + pressures[x][y]) * cellHeight,
+						cellWidth,
+						pressures[x][y] * cellHeight
+					};
+
+					SDL_SetRenderDrawColor(g_pRenderer, 255 / 2, 255 / 2, 255, 255);
+					SDL_RenderFillRectF(g_pRenderer, &rect);
+				}
 			}
 			else
 			{
@@ -125,7 +141,10 @@ int main()
 	g_pRenderer = SDL_CreateRenderer(pWindow, -1, SDL_RENDERER_ACCELERATED);
 
 	// Create world
-	PressVelWorld world({ g_WorldWidth, g_WorldHeight });
+	//NoitaWorld world({ g_WorldWidth, g_WorldHeight });
+	//PressWorld world({ g_WorldWidth, g_WorldHeight });
+	//PressVelWorld world({ g_WorldWidth, g_WorldHeight });
+	PressVelWorldThreaded world({ g_WorldWidth, g_WorldHeight });
 
 	constexpr float updateInterval = 0.01f;
 	float timer = 0;
